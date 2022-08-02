@@ -19,37 +19,35 @@ def target_file(target_hosts, output_directory, quiet):
     target_file = open(targets, 'r')
     try:
         target_file = open(targets, 'r')
-        print("[*] Loaded targets from: %s" % targets)
+        print(f"[*] Loaded targets from: {targets}")
     except Exception:
-        print("[!] Unable to load: %s" % targets)
+        print(f"[!] Unable to load: {targets}")
 
     for ip_address in target_file:
         ip_address = ip_address.strip()
 
-        snmp_directory = output_directory + '/' + ip_address + '/scans/snmp/'
+        snmp_directory = f'{output_directory}/{ip_address}/scans/snmp/'
         check_directory(snmp_directory)
 
-        jobs = []
         p = multiprocessing.Process(
             target=snmp_scans, args=(
                 ip_address, snmp_directory))
-        jobs.append(p)
+        jobs = [p]
         p.start()
     target_file.close()
 
 
 def target_ip(target_hosts, output_directory, quiet):
-    print("[*] Loaded single target: %s" % target_hosts)
+    print(f"[*] Loaded single target: {target_hosts}")
     target_hosts = target_hosts.strip()
 
-    snmp_directory = output_directory + '/' + target_hosts + '/scans/snmp/'
+    snmp_directory = f'{output_directory}/{target_hosts}/scans/snmp/'
     check_directory(snmp_directory)
 
-    jobs = []
     p = multiprocessing.Process(
         target=snmp_scans, args=(
             target_hosts, snmp_directory))
-    jobs.append(p)
+    jobs = [p]
     p.start()
 
 
@@ -63,8 +61,7 @@ def snmp_walk(target_hosts, output_directory, quiet):
 
 
 def snmp_scans(ip_address, output_directory):
-    print("[+] Performing SNMP scans for %s to %s" %
-          (ip_address, output_directory))
+    print(f"[+] Performing SNMP scans for {ip_address} to {output_directory}")
     print(
         "   [>] Performing snmpwalk on public tree for:"
         " %s - Checking for System Processes" %
@@ -76,8 +73,8 @@ def snmp_scans(ip_address, output_directory):
     try:
         run_scan(SCAN, stderr=subprocess.STDOUT)
     except Exception:
-        print("[+] No Response from %s" % ip_address)
+        print(f"[+] No Response from {ip_address}")
     except subprocess.CalledProcessError:
-        print("[+] Subprocess failure during scan of %s" % ip_address)
+        print(f"[+] Subprocess failure during scan of {ip_address}")
 
-    print("[+] Completed SNMP scans for %s" % (ip_address))
+    print(f"[+] Completed SNMP scans for {ip_address}")

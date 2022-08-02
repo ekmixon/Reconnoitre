@@ -17,13 +17,13 @@ def nmap_scan(
         no_udp_service_scan):
     ip_address = ip_address.strip()
 
-    print("[+] Starting quick nmap scan for %s" % (ip_address))
+    print(f"[+] Starting quick nmap scan for {ip_address}")
     flags = get_config_options('nmap', 'quickscan')
     QUICKSCAN = f"nmap {flags} {ip_address} -oA '{output_directory}/{ip_address}.quick'"
     quickresults = run_scan(QUICKSCAN)
 
     write_recommendations(quickresults, ip_address, output_directory)
-    print("[*] TCP quick scans completed for %s" % ip_address)
+    print(f"[*] TCP quick scans completed for {ip_address}")
 
     if (quick):
         return
@@ -35,7 +35,7 @@ def nmap_scan(
             (("" if no_udp_service_scan is True else "/UDP"),
              ip_address,
              dns_server))
-        print("[+] Using DNS server %s" % (dns_server))
+        print(f"[+] Using DNS server {dns_server}")
         flags = get_config_options("nmap", "tcpscan")
         TCPSCAN = f"nmap {flags} --dns-servers {dns_server} -oN\
         '{output_directory}/{ip_address}.nmap' -oX\
@@ -47,8 +47,10 @@ def nmap_scan(
         -oX '{output_directory}/{ip_address}U_nmap_scan_import.xml' {ip_address}"
 
     else:
-        print("[+] Starting detailed TCP%s nmap scans for %s" % (
-            ("" if no_udp_service_scan is True else "/UDP"), ip_address))
+        print(
+            f'[+] Starting detailed TCP{"" if no_udp_service_scan is True else "/UDP"} nmap scans for {ip_address}'
+        )
+
         flags = get_config_options("nmap", "tcpscan")
         TCPSCAN = f"nmap {flags} -oN\
         '{output_directory}/{ip_address}.nmap' -oX\
@@ -61,8 +63,9 @@ def nmap_scan(
     tcpresults = run_scan(TCPSCAN)
 
     write_recommendations(tcpresults + udpresult, ip_address, output_directory)
-    print("[*] TCP%s scans completed for %s" %
-          (("" if no_udp_service_scan is True else "/UDP"), ip_address))
+    print(
+        f'[*] TCP{"" if no_udp_service_scan is True else "/UDP"} scans completed for {ip_address}'
+    )
 
 
 def valid_ip(address):
@@ -84,18 +87,17 @@ def target_file(
     target_file = open(targets, 'r')
     try:
         target_file = open(targets, 'r')
-        print("[*] Loaded targets from: %s" % targets)
+        print(f"[*] Loaded targets from: {targets}")
     except Exception:
-        print("[!] Unable to load: %s" % targets)
+        print(f"[!] Unable to load: {targets}")
 
     for ip_address in target_file:
         ip_address = ip_address.strip()
         create_dir_structure(ip_address, output_directory)
 
-        host_directory = output_directory + "/" + ip_address
-        nmap_directory = host_directory + "/scans"
+        host_directory = f"{output_directory}/{ip_address}"
+        nmap_directory = f"{host_directory}/scans"
 
-        jobs = []
         p = multiprocessing.Process(
             target=nmap_scan,
             args=(
@@ -104,7 +106,7 @@ def target_file(
                 dns_server,
                 quick,
                 no_udp_service_scan))
-        jobs.append(p)
+        jobs = [p]
         p.start()
     target_file.close()
 
@@ -116,14 +118,13 @@ def target_ip(
         quiet,
         quick,
         no_udp_service_scan):
-    print("[*] Loaded single target: %s" % target_hosts)
+    print(f"[*] Loaded single target: {target_hosts}")
     target_hosts = target_hosts.strip()
     create_dir_structure(target_hosts, output_directory)
 
-    host_directory = output_directory + "/" + target_hosts
-    nmap_directory = host_directory + "/scans"
+    host_directory = f"{output_directory}/{target_hosts}"
+    nmap_directory = f"{host_directory}/scans"
 
-    jobs = []
     p = multiprocessing.Process(
         target=nmap_scan,
         args=(
@@ -132,7 +133,7 @@ def target_ip(
             dns_server,
             quick,
             no_udp_service_scan))
-    jobs.append(p)
+    jobs = [p]
     p.start()
 
 

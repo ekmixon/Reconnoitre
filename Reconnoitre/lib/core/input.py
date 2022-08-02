@@ -6,7 +6,7 @@ class CliHelper(object):
     @staticmethod
     def readable_file(parser, arg):
         if not os.path.exists(arg):
-            parser.error("The file %s does not exist!" % arg)
+            parser.error(f"The file {arg} does not exist!")
         else:
             return open(arg, 'r')  # return an open file handle
 

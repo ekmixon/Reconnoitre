@@ -6,43 +6,42 @@ from Reconnoitre.lib.subprocess_helper import run_scan
 
 def hostname_scan(target_hosts, output_directory, quiet):
     check_directory(output_directory)
-    output_file = output_directory + "/hostnames.txt"
-    f = open(output_file, 'w')
-    print("[+] Writing hostnames to: %s" % output_file)
+    output_file = f"{output_directory}/hostnames.txt"
+    with open(output_file, 'w') as f:
+        print(f"[+] Writing hostnames to: {output_file}")
 
-    hostnames = 0
-    SWEEP = ''
+        hostnames = 0
+        SWEEP = ''
 
-    if (os.path.isfile(target_hosts)):
-        SWEEP = "nbtscan -q -f %s" % (target_hosts)
-    else:
-        SWEEP = "nbtscan -q %s" % (target_hosts)
+        if (os.path.isfile(target_hosts)):
+            SWEEP = f"nbtscan -q -f {target_hosts}"
+        else:
+            SWEEP = f"nbtscan -q {target_hosts}"
 
-    results = run_scan(SWEEP)
-    lines = results.split("\n")
+        results = run_scan(SWEEP)
+        lines = results.split("\n")
 
-    for line in lines:
-        line = line.strip()
-        line = line.rstrip()
+        for line in lines:
+            line = line.strip()
+            line = line.rstrip()
 
-        # Final line is blank which causes list index issues if we don't
-        # continue past it.
-        if " " not in line:
-            continue
+            # Final line is blank which causes list index issues if we don't
+            # continue past it.
+            if " " not in line:
+                continue
 
-        while "  " in line:
-            line = line.replace("  ", " ")
+            while "  " in line:
+                line = line.replace("  ", " ")
 
-        ip_address = line.split(" ")[0]
-        host = line.split(" ")[1]
+            ip_address = line.split(" ")[0]
+            host = line.split(" ")[1]
 
-        if (hostnames > 0):
-            f.write('\n')
+            if (hostnames > 0):
+                f.write('\n')
 
-        print("   [>] Discovered hostname: %s (%s)" % (host, ip_address))
-        f.write("%s - %s" % (host, ip_address))
-        hostnames += 1
+            print(f"   [>] Discovered hostname: {host} ({ip_address})")
+            f.write(f"{host} - {ip_address}")
+            hostnames += 1
 
-    print("[*] Found %s hostnames." % (hostnames))
-    print("[*] Created hostname list %s" % (output_file))
-    f.close()
+        print(f"[*] Found {hostnames} hostnames.")
+        print(f"[*] Created hostname list {output_file}")

@@ -28,38 +28,24 @@ def util_checks(util=None):
 
     if (pyvers[0] >= 3) and (pyvers[1] >= 3):  # python3.3+
         import shutil
-        if shutil.which(util) is None:
-            if util is "nmap":
-                print(
-                    "   [!] nmap was not found on your system."
-                    " Exiting since we wont be able to scan anything. "
-                    "Please install nmap and try again.")
-                sys.exit(1)
-            else:
-                print(
-                    "   [-] %s was not found in your system."
-                    " Scan types using this will fail." %
-                    util)
-                return "Not Found"
-        else:
+        if shutil.which(util) is not None:
             return "Found"
     else:  # less-than python 3.3
         from distutils import spawn
-        if spawn.find_executable(util) is None:
-            if util is "nmap":
-                print(
-                    "   [!] nmap was not found on your system."
-                    " Exiting since we wont be able to scan anything. "
-                    "Please install nmap and try again.")
-                sys.exit(1)
-            else:
-                print(
-                    "   [-] %s was not found in your system."
-                    " Scan types using this will fail." %
-                    util)
-                return "Not Found"
-        else:
+        if spawn.find_executable(util) is not None:
             return "Found"
+    if util is "nmap":
+        print(
+            "   [!] nmap was not found on your system."
+            " Exiting since we wont be able to scan anything. "
+            "Please install nmap and try again.")
+        sys.exit(1)
+    else:
+        print(
+            "   [-] %s was not found in your system."
+            " Scan types using this will fail." %
+            util)
+        return "Not Found"
 
 
 def main():

@@ -28,7 +28,7 @@ class VirtualHostScanner(object):
             ignore_content_length=0,
             wordlist="./wordlist/virtual-host-scanning.txt"):
         self.target = target
-        self.output = output + '/' + target + '_virtualhosts.txt'
+        self.output = f'{output}/{target}_virtualhosts.txt'
         self.port = port
         self.ignore_http_codes = list(
             map(int, ignore_http_codes.replace(' ', '').split(',')))
@@ -41,11 +41,9 @@ class VirtualHostScanner(object):
             " %s using port %s and wordlist %s" %
             (self.target, str(
                 self.port), self.wordlist))
-        print("[>] Ignoring HTTP codes: %s" % (self.ignore_http_codes))
+        print(f"[>] Ignoring HTTP codes: {self.ignore_http_codes}")
         if (self.ignore_content_length > 0):
-            print(
-                "[>] Ignoring Content length: %s" %
-                (self.ignore_content_length))
+            print(f"[>] Ignoring Content length: {self.ignore_content_length}")
 
         if not os.path.exists(self.wordlist):
             print(
@@ -61,8 +59,10 @@ class VirtualHostScanner(object):
             hostname = virtual_host.replace('%s', self.target)
 
             headers = {
-                'Host': hostname if self.port == 80 else '{}:{}'.format(
-                    hostname, self.port), 'Accept': '*/*'}
+                'Host': hostname if self.port == 80 else f'{hostname}:{self.port}',
+                'Accept': '*/*',
+            }
+
 
             dest_url = '{}://{}:{}/'.format('https' if int(self.port)
                                             == 443 else 'http',
@@ -82,12 +82,12 @@ class VirtualHostScanner(object):
                     res.headers.get('content-length'))):
                 continue
 
-            output = 'Found: {} (code: {}, length: {})'.format(
-                hostname, res.status_code, res.headers.get('content-length'))
+            output = f"Found: {hostname} (code: {res.status_code}, length: {res.headers.get('content-length')})"
+
             results += output + '\n'
 
             print(output)
             for key, val in res.headers.items():
-                output = '  {}: {}'.format(key, val)
+                output = f'  {key}: {val}'
                 results += output + '\n'
                 print(output)

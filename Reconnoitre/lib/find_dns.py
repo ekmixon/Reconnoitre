@@ -10,42 +10,38 @@ def find_dns(target_hosts, output_directory, quiet):
     hostcount = 0
     dnscount = 0
 
-    output_file = open(output_directory + "/DNS-Detailed.txt", 'w')
-    output_targets = open(output_directory + "/DNS-targets.txt", 'w')
+    with open(f"{output_directory}/DNS-Detailed.txt", 'w') as output_file:
+        output_targets = open(f"{output_directory}/DNS-targets.txt", 'w')
 
-    targets = load_targets(target_hosts, output_directory, quiet)
-    target_file = open(targets, 'r')
+        targets = load_targets(target_hosts, output_directory, quiet)
+        target_file = open(targets, 'r')
 
-    print("[*] Loaded targets from: %s" % targets)
-    print("[+] Enumerating TCP port 53 over targets to find dns servers")
+        print(f"[*] Loaded targets from: {targets}")
+        print("[+] Enumerating TCP port 53 over targets to find dns servers")
 
-    for ip_address in target_file:
-        hostcount += 1
-        ip_address = ip_address.strip()
-        ip_address = ip_address.rstrip()
+        for ip_address in target_file:
+            hostcount += 1
+            ip_address = ip_address.strip()
+            ip_address = ip_address.rstrip()
 
-        print("   [>] Testing %s for DNS" % ip_address)
-        DNSSCAN = "nmap -n -sV -Pn -vv -p53 %s" % (ip_address)
-        results = run_scan(DNSSCAN)
-        lines = results.split("\n")
+            print(f"   [>] Testing {ip_address} for DNS")
+            DNSSCAN = f"nmap -n -sV -Pn -vv -p53 {ip_address}"
+            results = run_scan(DNSSCAN)
+            lines = results.split("\n")
 
-        for line in lines:
-            line = line.strip()
-            line = line.rstrip()
-            if (("53/tcp" in line) and ("open" in line)
+            for line in lines:
+                line = line.strip()
+                line = line.rstrip()
+                if (("53/tcp" in line) and ("open" in line)
                     and ("Discovered" not in line)):
-                print(
-                    "      [=] Found DNS service running on: %s" %
-                    (ip_address))
-                output_file.write(
-                    "[*] Found DNS service running on: %s\n" %
-                    (ip_address))
-                output_file.write("   [>] %s\n" % (line))
-                output_targets.write("%s\n" % (ip_address))
-                dns_server_list.append(ip_address)
-                dnscount += 1
-    print("[*] Found %s DNS servers within %s hosts" %
-          (str(dnscount), str(hostcount)))
-    output_file.close()
+                    print(f"      [=] Found DNS service running on: {ip_address}")
+                    output_file.write(
+                        "[*] Found DNS service running on: %s\n" %
+                        (ip_address))
+                    output_file.write("   [>] %s\n" % (line))
+                    output_targets.write("%s\n" % (ip_address))
+                    dns_server_list.append(ip_address)
+                    dnscount += 1
+        print(f"[*] Found {str(dnscount)} DNS servers within {str(hostcount)} hosts")
     output_targets.close()
-    return '' if len(dns_server_list) == 0 else ','.join(dns_server_list)
+    return ','.join(dns_server_list) if dns_server_list else ''
